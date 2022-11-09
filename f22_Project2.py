@@ -44,11 +44,11 @@ def get_listings_from_search_results(html_file):
         
     for tag in soup.find_all(attrs={"itemprop" : "url"}): 
         url = tag["content"]
-        pattern = r"(\d{7})"
+        pattern = r"(\d+)"
         id = re.findall(pattern, url)
         ids.append(id[0])
     
-    for i in range(len(names)):
+    for i in range(20):
         tuple_list = []
         tuple_list.append(names[i])
         tuple_list.append(costs[i])
@@ -56,7 +56,7 @@ def get_listings_from_search_results(html_file):
         tup = tuple(tuple_list)
         list.append(tup)
 
-    print(list)
+    # print(list)
     return list
     pass
 
@@ -180,10 +180,38 @@ class TestCases(unittest.TestCase):
         # check that the variable you saved after calling the function is a list
         self.assertEqual(type(listings), list)
         # check that each item in the list is a tuple
+        for item in listings:
+            self.assertEqual(type(item), tuple)
 
         # check that the first title, cost, and listing id tuple is correct (open the search results html and find it)
+        file = open("html_files/mission_district_search_results.html", 'r')
+        content = file.read()
+        file.close()
+        soup = BeautifulSoup(content, 'html.parser')
+        s1 = soup.find(attrs={"class" : "t1jojoys dir dir-ltr"})
+        name = s1.text
+        s2 = soup.find(attrs={"class" : "_tyxjp1"})
+        cost = int(s2.text[1:])
+        s3 = soup.find(attrs={"itemprop" : "url"})
+        id = re.search("(\d+)", s3["content"])
+        self.assertEqual(listings[0][0], name)
+        self.assertEqual(listings[0][1], cost)
+        self.assertEqual(listings[0][2], id.group())
 
         # check that the last title is correct (open the search results html and find it)
+        file = open("html_files/mission_district_search_results.html", 'r')
+        content = file.read()
+        file.close()
+        soup = BeautifulSoup(content, 'html.parser')
+        s1 = soup.find_all(attrs={"class" : "t1jojoys dir dir-ltr"})
+        name = s1.pop().text
+        s2 = soup.find_all(attrs={"class" : "_tyxjp1"})
+        cost = int(s2.pop().text[1:])
+        s3 = soup.find_all(attrs={"itemprop" : "url"})
+        id = re.search("(\d+)", s3.pop()["content"])
+        self.assertEqual(listings[-1][0], name)
+        self.assertEqual(listings[-1][1], cost)
+        self.assertEqual(listings[-1][2], id.group())
         pass
 
     def test_get_listing_information(self):
