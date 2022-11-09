@@ -4,6 +4,7 @@ import re
 import os
 import csv
 import unittest
+# Partners: Alex Chuang Alex Mah
 
 
 def get_listings_from_search_results(html_file):
@@ -25,6 +26,38 @@ def get_listings_from_search_results(html_file):
         ('Loft in Mission District', 210, '1944564'),  # example
     ]
     """
+    list = []
+    file = open(html_file, 'r')
+    content = file.read()
+    soup = BeautifulSoup(content, 'html.parser')
+    file.close()
+    names = []
+    costs = []
+    ids = []
+    for tag in soup.find_all(attrs={"itemprop" : "name"}):
+        name = tag["content"]
+        names.append(name)
+
+    for tag in soup.find_all(attrs={"class" : "_tyxjp1"}):
+        cost = tag.text[1:]
+        costs.append(int(cost))
+        
+    for tag in soup.find_all(attrs={"itemprop" : "url"}): 
+        url = tag["content"]
+        pattern = r"(\d{7})"
+        id = re.findall(pattern, url)
+        ids.append(id[0])
+    
+    for i in range(len(names)):
+        tuple_list = []
+        tuple_list.append(names[i])
+        tuple_list.append(costs[i])
+        tuple_list.append(ids[i])
+        tup = tuple(tuple_list)
+        list.append(tup)
+
+    print(list)
+    return list
     pass
 
 
