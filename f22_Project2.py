@@ -34,8 +34,8 @@ def get_listings_from_search_results(html_file):
     names = []
     costs = []
     ids = []
-    for tag in soup.find_all(attrs={"itemprop" : "name"}):
-        name = tag["content"]
+    for tag in soup.find_all(attrs={"class" : "t1jojoys dir dir-ltr"}):
+        name = tag.text
         names.append(name)
 
     for tag in soup.find_all(attrs={"class" : "_tyxjp1"}):
