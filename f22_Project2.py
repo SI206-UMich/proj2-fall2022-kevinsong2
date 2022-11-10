@@ -201,7 +201,20 @@ def check_policy_numbers(data):
     ]
 
     """
-    pass
+    pattern1 = r'20\d\d\-00\d\d\d\dSTR'
+    pattern2 = r'STR\-000\d\d\d\d'
+    id_list = []
+ 
+    # looping through to check whether the policy number matches the regex for each tuple
+    for tup in data:
+        if (bool(re.search(pattern1, tup[3])) or bool(re.search(pattern2, tup[3]))):
+            continue
+        elif (tup[3] == "Pending" or tup[3] == "Exempt"):
+            continue
+        else:
+            id_list.append(tup[2])
+    # print(id_list)
+    return id_list
 
 
 def extra_credit(listing_id):
@@ -349,11 +362,11 @@ class TestCases(unittest.TestCase):
         # check that the return value is a list
         self.assertEqual(type(invalid_listings), list)
         # check that there is exactly one element in the string
-
+        self.assertEqual(len(invalid_listings), 1)
         # check that the element in the list is a string
-
+        self.assertEqual(type(invalid_listings[0]), str)
         # check that the first element in the list is '16204265'
-        pass
+        self.assertEqual(invalid_listings[0], "16204265")
 
 
 if __name__ == '__main__':
