@@ -48,7 +48,7 @@ def get_listings_from_search_results(html_file):
         id = re.findall(pattern, url)
         ids.append(id[0])
     
-    for i in range(20):
+    for i in range(len(names)):
         tuple_list = []
         tuple_list.append(names[i])
         tuple_list.append(costs[i])
@@ -97,9 +97,12 @@ def get_listing_information(listing_id):
     for tag in soup.find(attrs={"class" : "f19phm7j dir dir-ltr"}):
         policy = tag.text
         res = policy.split(':')[-1]
-        if (bool(re.search("Application", res))):
-            res = res.split(' ')[0]
-        list2.append(res)
+        if (bool(re.search("[Pp]ending", res))):
+            list2.append("Pending")
+        elif (bool(re.search("needed", res))):
+            list2.append("Exempt")
+        else:
+            list2.append(res)
 
     for tag in soup.find(attrs={"class" : "_14i3z6h"}):
         placeType = tag.text
@@ -112,8 +115,11 @@ def get_listing_information(listing_id):
             list2.append("Shared Room")
     
     for tag in soup.find(attrs={"class" : "lgx66tx dir dir-ltr"}).find_all("span")[5]:
-        numBeds = tag.split(" ")[0]
-        list2.append(int(numBeds))
+        if tag == "Studio":
+            list2.append(1)
+        else:
+            numBeds = tag.split(" ")[0]
+            list2.append(int(numBeds))
 
     rel_info = tuple(list2[1:])
     # print(rel_info)
@@ -134,7 +140,14 @@ def get_detailed_listing_database(html_file):
         ...
     ]
     """
-    pass
+    det_list = []
+    list = get_listings_from_search_results(html_file)
+    for item in list:
+        tup = get_listing_information(item[2])
+        new_tup = item + tup
+        det_list.append(new_tup)
+    # print(det_list)
+    return det_list
 
 
 def write_csv(data, filename):
@@ -273,7 +286,6 @@ class TestCases(unittest.TestCase):
 
         # check that the third listing has one bedroom
         self.assertEqual(listing_informations[2][2], 1)
-        
 
     def test_get_detailed_listing_database(self):
         # call get_detailed_listing_database on "html_files/mission_district_search_results.html"
@@ -285,14 +297,17 @@ class TestCases(unittest.TestCase):
             # assert each item in the list of listings is a tuple
             self.assertEqual(type(item), tuple)
             # check that each tuple has a length of 6
+            self.assertEqual(len(item), 6)
 
         # check that the first tuple is made up of the following:
         # 'Loft in Mission District', 210, '1944564', '2022-004088STR', 'Entire Room', 1
+        following = ('Loft in Mission District', 210, '1944564', '2022-004088STR', 'Entire Room', 1)
+        self.assertEqual(detailed_database[0], following)
 
         # check that the last tuple is made up of the following:
         # 'Guest suite in Mission District', 238, '32871760', 'STR-0004707', 'Entire Room', 1
-
-        pass
+        tup = ('Guest suite in Mission District', 238, '32871760', 'STR-0004707', 'Entire Room', 1)
+        self.assertEqual(detailed_database[-1], tup)
 
     def test_write_csv(self):
         # call get_detailed_listing_database on "html_files/mission_district_search_results.html"
